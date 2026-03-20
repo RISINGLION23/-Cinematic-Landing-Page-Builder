@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CollabCore — Build the Future.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#E8E4DD;
+    --red:#E63B2E;
+    --offwhite:#F5F3EE;
+    --black:#111111;
+    --mono:'Space Mono',monospace;
+    --sans:'Space Grotesk',sans-serif;
+    --serif:'DM Serif Display',serif;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--black);
+    font-family:var(--sans);
+    overflow-x:hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events:none;
+    z-index:9999;
+    opacity:.5;
+  }
+
+  /* ── NAVBAR ── */
+  #navbar{
+    position:fixed;
+    top:1.25rem;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:1000;
+    width:calc(100% - 3rem);
+    max-width:1100px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:.75rem 1.5rem;
+    border-radius:3rem;
+    transition:background .4s,border-color .4s,box-shadow .4s;
+    border:1px solid transparent;
+  }
+  #navbar.scrolled{
+    background:rgba(245,243,238,.75);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border-color:rgba(17,17,17,.12);
+    box-shadow:0 2px 30px rgba(17,17,17,.08);
+  }
+  .nav-logo{
+    font-family:var(--mono);
+    font-size:1rem;
+    font-weight:700;
+    color:var(--offwhite);
+    letter-spacing:-.02em;
+    text-decoration:none;
+    transition:color .4s;
+  }
+  #navbar.scrolled .nav-logo{color:var(--black)}
+  .nav-links{
+    display:flex;
+    gap:2rem;
+    list-style:none;
+  }
+  .nav-links a{
+    font-size:.875rem;
+    font-weight:500;
+    color:rgba(245,243,238,.7);
+    text-decoration:none;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    transition:color .4s,transform .2s;
+  }
+  #navbar.scrolled .nav-links a{color:rgba(17,17,17,.6)}
+  .nav-links a:hover{
+    color:var(--red);
+    transform:translateY(-1px);
+  }
+  #navbar.scrolled .nav-links a:hover{color:var(--red)}
+  .nav-cta{
+    font-family:var(--mono);
+    font-size:.8rem;
+    font-weight:700;
+    color:var(--red);
+    text-decoration:none;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    border:1.5px solid var(--red);
+    padding:.5rem 1.25rem;
+    border-radius:2rem;
+    position:relative;
+    overflow:hidden;
+    transition:color .3s,transform .2s;
+  }
+  .nav-cta::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:var(--red);
+    transform:translateX(-101%);
+    transition:transform .35s cubic-bezier(0.25,0.46,0.45,0.94);
+    z-index:-1;
+  }
+  .nav-cta:hover{
+    color:var(--offwhite);
+    transform:scale(1.03);
+  }
+  .nav-cta:hover::before{transform:translateX(0)}
+
+  /* ── HERO ── */
+  #hero{
+    height:100dvh;
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    overflow:hidden;
+  }
+  .hero-bg{
+    position:absolute;
+    inset:0;
+    background-image:url('https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1920&q=80');
+    background-size:cover;
+    background-position:center 40%;
+    transform:scale(1.05);
+    will-change:transform;
+  }
+  .hero-overlay{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top,rgba(17,17,17,.95) 0%,rgba(17,17,17,.6) 40%,rgba(17,17,17,.2) 100%);
+  }
+  .hero-content{
+    position:relative;
+    z-index:2;
+    padding:5rem 5vw 6rem;
+    max-width:900px;
+  }
+  .hero-label{
+    font-family:var(--mono);
+    font-size:.8rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:1.5rem;
+    opacity:0;
+  }
+  .hero-head-sans{
+    font-family:var(--sans);
+    font-size:clamp(3rem,8vw,7rem);
+    font-weight:700;
+    color:var(--offwhite);
+    line-height:1;
+    letter-spacing:-.04em;
+    display:block;
+    opacity:0;
+  }
+  .hero-head-serif{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:clamp(5rem,14vw,12rem);
+    color:var(--red);
+    line-height:.9;
+    letter-spacing:-.02em;
+    display:block;
+    opacity:0;
+  }
+  .hero-sub{
+    font-size:clamp(1rem,2vw,1.25rem);
+    color:rgba(245,243,238,.6);
+    max-width:560px;
+    line-height:1.65;
+    margin-top:2rem;
+    font-weight:400;
+    opacity:0;
+  }
+  .hero-cta-wrap{
+    margin-top:2.5rem;
+    display:flex;
+    align-items:center;
+    gap:2rem;
+    opacity:0;
+  }
+  .btn-primary{
+    display:inline-flex;
+    align-items:center;
+    gap:.75rem;
+    font-family:var(--mono);
+    font-size:.875rem;
+    font-weight:700;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--black);
+    background:var(--red);
+    padding:1rem 2.5rem;
+    border-radius:2rem;
+    text-decoration:none;
+    position:relative;
+    overflow:hidden;
+    transition:transform .25s cubic-bezier(0.25,0.46,0.45,0.94),box-shadow .25s;
+  }
+  .btn-primary::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:var(--offwhite);
+    transform:translateX(-101%);
+    transition:transform .35s cubic-bezier(0.25,0.46,0.45,0.94);
+    z-index:0;
+  }
+  .btn-primary span{position:relative;z-index:1}
+  .btn-primary:hover{
+    transform:scale(1.03);
+    box-shadow:0 8px 32px rgba(230,59,46,.4);
+    color:var(--black);
+  }
+  .btn-primary:hover::before{transform:translateX(0)}
+  .hero-scroll-hint{
+    font-family:var(--mono);
+    font-size:.75rem;
+    color:rgba(245,243,238,.4);
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+  }
+  .scroll-line{
+    width:40px;
+    height:1px;
+    background:rgba(245,243,238,.3);
+  }
+
+  /* ── SECTION BASE ── */
+  section{padding:6rem 5vw}
+  .section-tag{
+    font-family:var(--mono);
+    font-size:.75rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:1rem;
+    display:block;
+  }
+  .section-title{
+    font-family:var(--sans);
+    font-size:clamp(2rem,5vw,4rem);
+    font-weight:700;
+    line-height:1.05;
+    letter-spacing:-.03em;
+    color:var(--black);
+    margin-bottom:1.5rem;
+  }
+  .section-title em{
+    font-family:var(--serif);
+    font-style:italic;
+    font-weight:400;
+    color:var(--red);
+  }
+
+  /* ── FEATURES ── */
+  #features{background:var(--offwhite)}
+  .features-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1.5rem;
+    margin-top:4rem;
+  }
+  .feat-card{
+    background:var(--paper);
+    border-radius:2rem;
+    padding:2rem;
+    border:1px solid rgba(17,17,17,.1);
+    box-shadow:0 4px 24px rgba(17,17,17,.06);
+    min-height:380px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    position:relative;
+  }
+  .feat-card-head{
+    font-family:var(--mono);
+    font-size:.7rem;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:.5rem;
+  }
+  .feat-card-title{
+    font-family:var(--sans);
+    font-size:1.25rem;
+    font-weight:700;
+    letter-spacing:-.02em;
+    margin-bottom:.5rem;
+  }
+  .feat-card-desc{
+    font-size:.875rem;
+    color:rgba(17,17,17,.55);
+    line-height:1.6;
+    margin-bottom:1.5rem;
+  }
+  .feat-card-body{flex:1;position:relative}
+
+  /* Card 1 — Shuffler */
+  .shuffler{
+    position:relative;
+    height:160px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .shuf-card{
+    position:absolute;
+    background:var(--black);
+    color:var(--offwhite);
+    border-radius:1rem;
+    padding:1rem 1.25rem;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:var(--mono);
+    font-size:.875rem;
+    transition:transform .6s cubic-bezier(0.34,1.56,0.64,1),opacity .4s;
+  }
+  .shuf-card:nth-child(1){transform:translateY(0) scale(1);z-index:3}
+  .shuf-card:nth-child(2){transform:translateY(12px) scale(.97);z-index:2;opacity:.7}
+  .shuf-card:nth-child(3){transform:translateY(24px) scale(.94);z-index:1;opacity:.4}
+  .shuf-dot{
+    width:8px;height:8px;border-radius:50%;background:var(--red);
+    animation:pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* Card 2 — Typewriter */
+  .typewriter-wrap{
+    background:var(--black);
+    border-radius:1rem;
+    padding:1rem 1.25rem;
+    height:160px;
+    overflow:hidden;
+    position:relative;
+  }
+  .tw-bar{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    margin-bottom:.75rem;
+    padding-bottom:.75rem;
+    border-bottom:1px solid rgba(245,243,238,.1);
+  }
+  .tw-live-dot{
+    width:6px;height:6px;border-radius:50%;background:#4ade80;
+    animation:pulse 1s ease-in-out infinite;
+  }
+  .tw-label{
+    font-family:var(--mono);
+    font-size:.65rem;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:rgba(245,243,238,.4);
+  }
+  .tw-line{
+    font-family:var(--mono);
+    font-size:.75rem;
+    color:rgba(245,243,238,.7);
+    line-height:1.8;
+    white-space:nowrap;
+  }
+  .tw-cursor{
+    display:inline-block;
+    width:7px;height:13px;
+    background:var(--red);
+    animation:blink .8s step-end infinite;
+    vertical-align:middle;
+    margin-left:2px;
+  }
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+  /* Card 3 — Scheduler */
+  .scheduler-wrap{
+    background:var(--black);
+    border-radius:1rem;
+    padding:1rem 1.25rem;
+    height:160px;
+    position:relative;
+    overflow:hidden;
+  }
+  .sched-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+    margin-bottom:.75rem;
+  }
+  .sched-day{
+    aspect-ratio:1;
+    border-radius:6px;
+    background:rgba(245,243,238,.08);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    transition:background .3s,transform .15s;
+    cursor:default;
+  }
+  .sched-day-label{
+    font-family:var(--mono);
+    font-size:.6rem;
+    color:rgba(245,243,238,.35);
+    text-transform:uppercase;
+  }
+  .sched-day.active{background:var(--red);transform:scale(.95)}
+  .sched-day.active .sched-day-label{color:var(--offwhite)}
+  .sched-save{
+    font-family:var(--mono);
+    font-size:.7rem;
+    text-transform:uppercase;
+    color:var(--offwhite);
+    background:rgba(245,243,238,.1);
+    border:1px solid rgba(245,243,238,.2);
+    border-radius:.5rem;
+    padding:.4rem .75rem;
+    cursor:pointer;
+    transition:background .3s;
+    display:inline-block;
+  }
+  .sched-save.clicking{background:rgba(230,59,46,.5)}
+  .sched-cursor{
+    width:16px;height:16px;
+    background:var(--red);
+    border-radius:50% 50% 50% 0;
+    rotate:-45deg;
+    position:absolute;
+    transition:left .4s cubic-bezier(0.34,1.56,0.64,1),top .4s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow:0 2px 8px rgba(230,59,46,.6);
+    pointer-events:none;
+  }
+
+  /* ── PHILOSOPHY ── */
+  #philosophy{
+    background:var(--black);
+    position:relative;
+    overflow:hidden;
+    min-height:70vh;
+    display:flex;
+    align-items:center;
+  }
+  .phil-bg{
+    position:absolute;
+    inset:0;
+    background-image:url('https://images.unsplash.com/photo-1494336956552-8de8b35427ee?w=1400&q=60');
+    background-size:cover;
+    background-position:center;
+    opacity:.08;
+  }
+  .phil-content{
+    position:relative;
+    z-index:2;
+    max-width:900px;
+  }
+  .phil-normal{
+    font-family:var(--sans);
+    font-size:clamp(1rem,2.5vw,1.5rem);
+    color:rgba(245,243,238,.4);
+    font-weight:400;
+    margin-bottom:2rem;
+    line-height:1.5;
+  }
+  .phil-accent{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:clamp(2.5rem,7vw,6rem);
+    color:var(--offwhite);
+    line-height:1.1;
+    letter-spacing:-.02em;
+  }
+  .phil-accent em{color:var(--red);font-style:italic}
+  .phil-rule{
+    width:60px;height:2px;background:var(--red);
+    margin:3rem 0 2rem;
+  }
+
+  /* ── PROTOCOL (STICKY) ── */
+  #protocol{background:var(--paper);padding:0}
+  .protocol-intro{
+    padding:6rem 5vw 3rem;
+    max-width:600px;
+  }
+  .protocol-stage{
+    height:100vh;
+    position:sticky;
+    top:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .proto-card{
+    width:calc(100% - 4rem);
+    max-width:1000px;
+    min-height:75vh;
+    background:var(--offwhite);
+    border-radius:2.5rem;
+    border:1px solid rgba(17,17,17,.1);
+    padding:4rem 5vw;
+    display:flex;
+    align-items:center;
+    gap:5vw;
+    position:absolute;
+    box-shadow:0 20px 80px rgba(17,17,17,.1);
+    will-change:transform,filter,opacity;
+  }
+  .proto-card:nth-child(1){background:var(--offwhite)}
+  .proto-card:nth-child(2){background:var(--paper)}
+  .proto-card:nth-child(3){background:var(--black);color:var(--offwhite)}
+  .proto-num{
+    font-family:var(--mono);
+    font-size:clamp(4rem,10vw,8rem);
+    font-weight:700;
+    color:var(--red);
+    line-height:1;
+    flex-shrink:0;
+    opacity:.25;
+  }
+  .proto-text{flex:1}
+  .proto-step{
+    font-family:var(--mono);
+    font-size:.75rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:1rem;
+  }
+  .proto-title{
+    font-family:var(--sans);
+    font-size:clamp(2rem,4vw,3.5rem);
+    font-weight:700;
+    letter-spacing:-.03em;
+    line-height:1.05;
+    margin-bottom:1.25rem;
+  }
+  .proto-desc{
+    font-size:1rem;
+    line-height:1.75;
+    opacity:.6;
+    max-width:480px;
+  }
+  .proto-canvas{
+    width:clamp(160px,25vw,260px);
+    height:clamp(160px,25vw,260px);
+    flex-shrink:0;
+  }
+
+  /* ── PRICING ── */
+  #pricing{background:var(--offwhite)}
+  .pricing-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1.5rem;
+    margin-top:4rem;
+    align-items:start;
+  }
+  .price-card{
+    background:var(--paper);
+    border-radius:2rem;
+    padding:2.5rem 2rem;
+    border:1px solid rgba(17,17,17,.1);
+    transition:transform .3s cubic-bezier(0.25,0.46,0.45,0.94),box-shadow .3s;
+  }
+  .price-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 16px 48px rgba(17,17,17,.12);
+  }
+  .price-card.featured{
+    background:var(--black);
+    color:var(--offwhite);
+    border-color:var(--red);
+    transform:scale(1.04);
+    box-shadow:0 20px 60px rgba(17,17,17,.2);
+  }
+  .price-card.featured:hover{
+    transform:scale(1.04) translateY(-6px);
+  }
+  .price-tier{
+    font-family:var(--mono);
+    font-size:.75rem;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:1.5rem;
+  }
+  .price-amount{
+    font-family:var(--sans);
+    font-size:3rem;
+    font-weight:700;
+    letter-spacing:-.04em;
+    line-height:1;
+    margin-bottom:.5rem;
+  }
+  .price-sub{
+    font-size:.875rem;
+    opacity:.5;
+    margin-bottom:2rem;
+  }
+  .price-features{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:.875rem;
+    margin-bottom:2.5rem;
+  }
+  .price-features li{
+    font-size:.9rem;
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    opacity:.75;
+  }
+  .price-features li::before{
+    content:'—';
+    font-family:var(--mono);
+    color:var(--red);
+    flex-shrink:0;
+  }
+  .price-btn{
+    display:block;
+    text-align:center;
+    font-family:var(--mono);
+    font-size:.8rem;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    text-decoration:none;
+    padding:.9rem;
+    border-radius:1.5rem;
+    border:1.5px solid rgba(17,17,17,.2);
+    color:var(--black);
+    position:relative;
+    overflow:hidden;
+    transition:color .3s,transform .2s;
+  }
+  .price-card.featured .price-btn{
+    background:var(--red);
+    border-color:var(--red);
+    color:var(--offwhite);
+  }
+  .price-btn::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:var(--black);
+    transform:translateX(-101%);
+    transition:transform .3s cubic-bezier(0.25,0.46,0.45,0.94);
+    z-index:0;
+  }
+  .price-card.featured .price-btn::before{background:var(--offwhite)}
+  .price-btn span{position:relative;z-index:1}
+  .price-btn:hover{
+    color:var(--offwhite);
+    transform:scale(1.02);
+  }
+  .price-card.featured .price-btn:hover{color:var(--black)}
+  .price-btn:hover::before{transform:translateX(0)}
+
+  /* ── FOOTER ── */
+  footer{
+    background:var(--black);
+    border-radius:4rem 4rem 0 0;
+    padding:5rem 5vw 3rem;
+    color:var(--offwhite);
+    margin-top:3rem;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 1fr;
+    gap:4rem;
+    margin-bottom:4rem;
+  }
+  .footer-brand-name{
+    font-family:var(--mono);
+    font-size:1.5rem;
+    font-weight:700;
+    letter-spacing:-.02em;
+    margin-bottom:.75rem;
+    color:var(--offwhite);
+  }
+  .footer-brand-desc{
+    font-size:.9rem;
+    color:rgba(245,243,238,.4);
+    line-height:1.6;
+    max-width:280px;
+  }
+  .footer-col-title{
+    font-family:var(--mono);
+    font-size:.7rem;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-bottom:1.25rem;
+  }
+  .footer-col a{
+    display:block;
+    font-size:.875rem;
+    color:rgba(245,243,238,.45);
+    text-decoration:none;
+    margin-bottom:.75rem;
+    transition:color .2s,transform .2s;
+  }
+  .footer-col a:hover{
+    color:var(--offwhite);
+    transform:translateX(3px);
+  }
+  .footer-bottom{
+    border-top:1px solid rgba(245,243,238,.1);
+    padding-top:2rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .footer-legal{
+    font-family:var(--mono);
+    font-size:.7rem;
+    color:rgba(245,243,238,.25);
+    letter-spacing:.05em;
+  }
+  .status-pill{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    background:rgba(74,222,128,.1);
+    border:1px solid rgba(74,222,128,.2);
+    border-radius:2rem;
+    padding:.4rem 1rem;
+  }
+  .status-dot{
+    width:7px;height:7px;border-radius:50%;
+    background:#4ade80;
+    animation:pulse 1.5s ease-in-out infinite;
+  }
+  .status-label{
+    font-family:var(--mono);
+    font-size:.7rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#4ade80;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:900px){
+    .features-grid{grid-template-columns:1fr}
+    .pricing-grid{grid-template-columns:1fr}
+    .price-card.featured{transform:none}
+    .footer-grid{grid-template-columns:1fr 1fr}
+    .nav-links{display:none}
+  }
+  @media(max-width:600px){
+    .footer-grid{grid-template-columns:1fr}
+    .proto-card{flex-direction:column;padding:2.5rem 1.5rem}
+    .proto-canvas{width:100%;max-width:200px;height:200px}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a class="nav-logo" href="#">CC/</a>
+  <ul class="nav-links">
+    <li><a href="#features">Model</a></li>
+    <li><a href="#protocol">Protocol</a></li>
+    <li><a href="#pricing">Access</a></li>
+  </ul>
+  <a href="#pricing" class="nav-cta">Start a Collaboration</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-label">Collaborative Intelligence / 2025</p>
+    <span class="hero-head-sans">Build the</span>
+    <span class="hero-head-serif">Future.</span>
+    <p class="hero-sub">CollabCore bridges AI businesses with product companies — co-creating software that scales, integrates, and accelerates market dominance.</p>
+    <div class="hero-cta-wrap">
+      <a href="#pricing" class="btn-primary"><span>Start a Collaboration</span></a>
+      <div class="hero-scroll-hint">
+        <div class="scroll-line"></div>
+        <span>Scroll</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <span class="section-tag">/ 01 — The Model</span>
+  <h2 class="section-title">Three pillars of <em>systemic</em><br>co-creation.</h2>
+
+  <div class="features-grid">
+    <!-- Card 1: Shuffler — Smart Co-development -->
+    <div class="feat-card">
+      <div class="feat-card-head">01 / Smart Co-development</div>
+      <div class="feat-card-title">Shared Intelligence</div>
+      <div class="feat-card-desc">Your team and our AI architects operate as a single unit — from ideation to production-ready code.</div>
+      <div class="feat-card-body">
+        <div class="shuffler" id="shuffler">
+          <div class="shuf-card">
+            <span>Design Sprint</span><div class="shuf-dot"></div>
+          </div>
+          <div class="shuf-card">
+            <span>Code Review</span><div class="shuf-dot" style="background:rgba(245,243,238,.3)"></div>
+          </div>
+          <div class="shuf-card">
+            <span>Architecture</span><div class="shuf-dot" style="background:rgba(245,243,238,.15)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Typewriter — Seamless Integration -->
+    <div class="feat-card">
+      <div class="feat-card-head">02 / Seamless Integration</div>
+      <div class="feat-card-title">Live Sync</div>
+      <div class="feat-card-desc">Real-time data flows, API bridges, and zero-friction handoffs — your stack, amplified.</div>
+      <div class="feat-card-body">
+        <div class="typewriter-wrap">
+          <div class="tw-bar">
+            <div class="tw-live-dot"></div>
+            <span class="tw-label">Integration Feed</span>
+          </div>
+          <div id="tw-output">
+            <div class="tw-line"><span id="tw-text"></span><span class="tw-cursor"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Scheduler — PMF Acceleration -->
+    <div class="feat-card">
+      <div class="feat-card-head">03 / PMF Acceleration</div>
+      <div class="feat-card-title">Sprint Protocol</div>
+      <div class="feat-card-desc">Structured sprints calibrated to market signals — ship faster, validate sooner, iterate fearlessly.</div>
+      <div class="feat-card-body">
+        <div class="scheduler-wrap" id="scheduler-wrap">
+          <div class="sched-grid" id="sched-grid"></div>
+          <div id="sched-save" class="sched-save">Save Sprint →</div>
+          <div class="sched-cursor" id="sched-cursor" style="left:8px;top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <div class="phil-bg"></div>
+  <div class="phil-content">
+    <span class="section-tag">/ 02 — Manifesto</span>
+    <p class="phil-normal">Most tech partnerships focus on: deliverables, deadlines, and handoffs.</p>
+    <div class="phil-rule"></div>
+    <p class="phil-accent" id="phil-text">We focus on:<br><em>systemic co-creation.</em></p>
+  </div>
+</section>
+
+<!-- PROTOCOL -->
+<section id="protocol">
+  <div class="protocol-intro">
+    <span class="section-tag">/ 03 — The Protocol</span>
+    <h2 class="section-title">Three steps to <em>operational</em> excellence.</h2>
+  </div>
+
+  <div id="proto-stages">
+    <!-- Stage 1: Sync -->
+    <div class="protocol-stage">
+      <div class="proto-card">
+        <div class="proto-num">01</div>
+        <div class="proto-text">
+          <div class="proto-step">Step One / Sync</div>
+          <h3 class="proto-title">Discovery &amp;<br>Strategic Alignment</h3>
+          <p class="proto-desc">We deep-dive your product architecture, market position, and technical debt. We map the terrain before we build. No assumptions, only data.</p>
+        </div>
+        <canvas class="proto-canvas" id="canvas-1" width="260" height="260"></canvas>
+      </div>
+    </div>
+
+    <!-- Stage 2: Build -->
+    <div class="protocol-stage">
+      <div class="proto-card">
+        <div class="proto-num">02</div>
+        <div class="proto-text">
+          <div class="proto-step">Step Two / Build</div>
+          <h3 class="proto-title">Co-Development &amp;<br>Integration</h3>
+          <p class="proto-desc">Embedded AI engineers, weekly sprints, and continuous integration. Your roadmap becomes our mandate — shipped with precision.</p>
+        </div>
+        <canvas class="proto-canvas" id="canvas-2" width="260" height="260"></canvas>
+      </div>
+    </div>
+
+    <!-- Stage 3: Scale -->
+    <div class="protocol-stage">
+      <div class="proto-card" style="background:var(--black);color:var(--offwhite)">
+        <div class="proto-num">03</div>
+        <div class="proto-text">
+          <div class="proto-step">Step Three / Scale</div>
+          <h3 class="proto-title">Product-Market<br>Acceleration</h3>
+          <p class="proto-desc">Data-driven iteration cycles, A/B infrastructure, and growth engineering. We don't just launch — we achieve escape velocity.</p>
+        </div>
+        <canvas class="proto-canvas" id="canvas-3" width="260" height="260"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <span class="section-tag">/ 04 — Access</span>
+  <h2 class="section-title">Choose your <em>collaboration</em><br>tier.</h2>
+
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">/ Essential</div>
+      <div class="price-amount">$4K</div>
+      <div class="price-sub">per month / 2 seats</div>
+      <ul class="price-features">
+        <li>1 embedded AI engineer</li>
+        <li>Weekly sprint reviews</li>
+        <li>API & integration audit</li>
+        <li>Slack async support</li>
+        <li>Monthly strategy call</li>
+      </ul>
+      <a href="#" class="price-btn"><span>Start a Collaboration</span></a>
+    </div>
+
+    <div class="price-card featured">
+      <div class="price-tier">/ Performance</div>
+      <div class="price-amount">$12K</div>
+      <div class="price-sub">per month / 5 seats</div>
+      <ul class="price-features">
+        <li>3 embedded AI engineers</li>
+        <li>Bi-weekly co-working sessions</li>
+        <li>Full-stack integration suite</li>
+        <li>Dedicated Slack channel</li>
+        <li>PMF acceleration protocol</li>
+        <li>Priority 4-hour response</li>
+      </ul>
+      <a href="#" class="price-btn"><span>Start a Collaboration</span></a>
+    </div>
+
+    <div class="price-card">
+      <div class="price-tier">/ Enterprise</div>
+      <div class="price-amount">Custom</div>
+      <div class="price-sub">bespoke / unlimited seats</div>
+      <ul class="price-features">
+        <li>Fractional CTO service</li>
+        <li>Dedicated engineering pod</li>
+        <li>White-label AI systems</li>
+        <li>On-site immersives</li>
+        <li>Investor-ready architecture</li>
+      </ul>
+      <a href="#" class="price-btn"><span>Book a Briefing</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">CollabCore/</div>
+      <p class="footer-brand-desc">Where AI businesses and product companies build the future together. Precision co-creation at scale.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Company</div>
+      <a href="#">About</a>
+      <a href="#">Manifesto</a>
+      <a href="#">Case Studies</a>
+      <a href="#">Careers</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Product</div>
+      <a href="#features">Model</a>
+      <a href="#protocol">Protocol</a>
+      <a href="#pricing">Access</a>
+      <a href="#">Documentation</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Connect</div>
+      <a href="#">hello@collabcore.io</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">GitHub</a>
+      <a href="#">Twitter/X</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-legal">© 2025 CollabCore Ltd. — All systems nominal.</div>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      <span class="status-label">System Operational</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── NAVBAR MORPH ── */
+const navbar = document.getElementById('navbar');
+const heroObserver = new IntersectionObserver(([e]) => {
+  navbar.classList.toggle('scrolled', e.intersectionRatio < 0.5);
+}, {threshold:[0,.5]});
+heroObserver.observe(document.getElementById('hero'));
+
+/* ── HERO ENTRANCE ── */
+const ctx = gsap.context(() => {
+  gsap.timeline({delay:.1})
+    .to('.hero-label',{opacity:1,y:0,duration:.7,ease:'power3.out'},{y:20})
+    .to('.hero-head-sans',{opacity:1,y:0,duration:.8,ease:'power3.out'},'-=.4',{y:30})
+    .to('.hero-head-serif',{opacity:1,y:0,duration:.9,ease:'power3.out'},'-=.5',{y:40})
+    .to('.hero-sub',{opacity:1,y:0,duration:.7,ease:'power3.out'},'-=.4',{y:20})
+    .to('.hero-cta-wrap',{opacity:1,y:0,duration:.6,ease:'power3.out'},'-=.3',{y:20});
+
+  // Hero parallax
+  gsap.to('#hero-bg',{
+    yPercent:-15,
+    ease:'none',
+    scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}
+  });
+
+  // Sections fade in
+  gsap.utils.toArray('.feat-card,.price-card').forEach((el,i) => {
+    gsap.fromTo(el,
+      {opacity:0,y:40},
+      {opacity:1,y:0,duration:.7,ease:'power3.out',
+       scrollTrigger:{trigger:el,start:'top 88%'},delay:i*.08}
+    );
+  });
+
+  // Philosophy text
+  gsap.fromTo('.phil-accent',
+    {opacity:0,y:30},
+    {opacity:1,y:0,duration:1,ease:'power3.out',
+     scrollTrigger:{trigger:'#philosophy',start:'top 65%'}}
+  );
+  gsap.fromTo('.phil-normal,.phil-rule',
+    {opacity:0,y:20},
+    {opacity:1,y:0,duration:.7,stagger:.15,ease:'power3.out',
+     scrollTrigger:{trigger:'#philosophy',start:'top 70%'}}
+  );
+
+  // Protocol cards stacking
+  const stages = gsap.utils.toArray('.protocol-stage');
+  stages.forEach((stage, i) => {
+    if (i < stages.length - 1) {
+      const card = stage.querySelector('.proto-card');
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top top',
+        end: '+=100%',
+        pin: true,
+        pinSpacing: false
+      });
+      gsap.to(card, {
+        scale: .9,
+        filter: 'blur(8px)',
+        opacity: .5,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: stage,
+          start: '60% top',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+    } else {
+      ScrollTrigger.create({
+        trigger: stage,
+        start: 'top top',
+        end: '+=60%',
+        pin: true,
+        pinSpacing: true
+      });
+    }
+  });
+});
+
+/* ── SHUFFLER ── */
+const shufCards = [...document.querySelectorAll('.shuf-card')];
+let shufData = ['Design Sprint','Code Review','Architecture'];
+setInterval(() => {
+  shufData.push(shufData.shift());
+  shufCards.forEach((c,i) => {
+    c.querySelector('span').textContent = shufData[i];
+    c.style.transform = ['translateY(0) scale(1)','translateY(12px) scale(.97)','translateY(24px) scale(.94)'][i];
+    c.style.opacity = [1,.7,.4][i];
+    c.style.zIndex = [3,2,1][i];
+  });
+},2800);
+
+/* ── TYPEWRITER ── */
+const twMessages = [
+  '> API endpoint /sync — 200 OK',
+  '> WebSocket bridge — ACTIVE',
+  '> Database schema — MIGRATED',
+  '> Auth service — CONNECTED',
+  '> CI pipeline — PASSING',
+  '> Deployment — LIVE ✓',
+];
+let twIdx = 0, twChar = 0;
+const twEl = document.getElementById('tw-text');
+function typeNext() {
+  const msg = twMessages[twIdx % twMessages.length];
+  if (twChar <= msg.length) {
+    twEl.textContent = msg.slice(0, twChar++);
+    setTimeout(typeNext, 45);
+  } else {
+    setTimeout(() => {
+      twChar = 0; twIdx++;
+      twEl.textContent = '';
+      typeNext();
+    }, 1600);
+  }
+}
+typeNext();
+
+/* ── SCHEDULER ── */
+const days = ['S','M','T','W','T','F','S'];
+const grid = document.getElementById('sched-grid');
+days.forEach((d,i) => {
+  const el = document.createElement('div');
+  el.className = 'sched-day';
+  el.dataset.idx = i;
+  el.innerHTML = `<span class="sched-day-label">${d}</span>`;
+  grid.appendChild(el);
+});
+const dayEls = [...grid.querySelectorAll('.sched-day')];
+const cursor = document.getElementById('sched-cursor');
+const saveBtn = document.getElementById('sched-save');
+let schedStep = 0;
+function runScheduler() {
+  dayEls.forEach(d => d.classList.remove('active'));
+  const schedule = [1,2,3]; // Mon Tue Wed
+  function step() {
+    if (schedStep < schedule.length) {
+      const target = dayEls[schedule[schedStep]];
+      const rect = target.getBoundingClientRect();
+      const wrap = document.getElementById('scheduler-wrap').getBoundingClientRect();
+      cursor.style.left = (rect.left - wrap.left + rect.width/2 - 8)+'px';
+      cursor.style.top = (rect.top - wrap.top + rect.height/2 - 8)+'px';
+      setTimeout(() => {
+        target.classList.add('active');
+        schedStep++;
+        setTimeout(step, 600);
+      }, 400);
+    } else {
+      const sbRect = saveBtn.getBoundingClientRect();
+      const wrapRect = document.getElementById('scheduler-wrap').getBoundingClientRect();
+      cursor.style.left = (sbRect.left - wrapRect.left + 16)+'px';
+      cursor.style.top = (sbRect.top - wrapRect.top + 8)+'px';
+      setTimeout(() => {
+        saveBtn.classList.add('clicking');
+        setTimeout(() => {
+          saveBtn.classList.remove('clicking');
+          schedStep = 0;
+          setTimeout(runScheduler, 1800);
+        }, 400);
+      }, 400);
+    }
+  }
+  step();
+}
+setTimeout(runScheduler, 1000);
+
+/* ── CANVAS ANIMATIONS ── */
+// Canvas 1: Rotating concentric circles (Sync)
+const c1 = document.getElementById('canvas-1');
+const cx1 = c1.getContext('2d');
+let angle1 = 0;
+function drawC1() {
+  cx1.clearRect(0,0,260,260);
+  const cx = 130, cy = 130;
+  [80,58,36,16].forEach((r,i) => {
+    cx1.save();
+    cx1.translate(cx,cy);
+    cx1.rotate(angle1 * (i%2===0 ? 1 : -1) * (1+i*.2));
+    cx1.beginPath();
+    const dash = 2 * Math.PI * r / 12;
+    cx1.setLineDash([dash*.6, dash*.4]);
+    cx1.arc(0,0,r,0,Math.PI*2);
+    cx1.strokeStyle = i===0 ? '#E63B2E' : `rgba(17,17,17,${.15+i*.08})`;
+    cx1.lineWidth = i===0 ? 2 : 1;
+    cx1.stroke();
+    cx1.restore();
+  });
+  angle1 += .008;
+  requestAnimationFrame(drawC1);
+}
+drawC1();
+
+// Canvas 2: Scanning laser grid (Build)
+const c2 = document.getElementById('canvas-2');
+const cx2 = c2.getContext('2d');
+let scanY = 0, scanDir = 1;
+function drawC2() {
+  cx2.clearRect(0,0,260,260);
+  const cols=8, rows=8, size=26, gap=6;
+  const offX=(260-(cols*size+(cols-1)*gap))/2;
+  const offY=(260-(rows*size+(rows-1)*gap))/2;
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const x=offX+c*(size+gap), y=offY+r*(size+gap);
+      const dist = Math.abs(y+size/2 - scanY);
+      const alpha = Math.max(.04, .25 - dist/60);
+      cx2.fillStyle = dist < 14 ? `rgba(230,59,46,${Math.max(.2,.8-dist/14)})` : `rgba(17,17,17,${alpha})`;
+      cx2.beginPath();
+      cx2.roundRect(x,y,size,size,4);
+      cx2.fill();
+    }
+  }
+  // Scan line
+  cx2.beginPath();
+  cx2.moveTo(offX,scanY);
+  cx2.lineTo(offX+cols*size+(cols-1)*gap,scanY);
+  const grad = cx2.createLinearGradient(offX,0,offX+cols*size+(cols-1)*gap,0);
+  grad.addColorStop(0,'rgba(230,59,46,0)');
+  grad.addColorStop(.5,'rgba(230,59,46,.8)');
+  grad.addColorStop(1,'rgba(230,59,46,0)');
+  cx2.strokeStyle=grad;
+  cx2.lineWidth=2;
+  cx2.stroke();
+  scanY += 1.2*scanDir;
+  if(scanY > offY+rows*(size+gap)) scanDir=-1;
+  if(scanY < offY) scanDir=1;
+  requestAnimationFrame(drawC2);
+}
+drawC2();
+
+// Canvas 3: EKG waveform (Scale)
+const c3 = document.getElementById('canvas-3');
+const cx3 = c3.getContext('2d');
+let ekgOffset = 0;
+function ekgY(x) {
+  const t = (x + ekgOffset) % 130;
+  if(t < 20) return 130;
+  if(t < 28) return 130 - (t-20)*8;
+  if(t < 32) return 130 + (t-28)*20;
+  if(t < 38) return 210 - (t-32)*18;
+  if(t < 48) return 102 + (t-38)*2.8;
+  if(t < 56) return 130;
+  return 130;
+}
+function drawC3() {
+  cx3.clearRect(0,0,260,260);
+  // Grid lines
+  for(let i=0;i<5;i++){
+    const y=50+i*40;
+    cx3.beginPath();
+    cx3.moveTo(0,y);cx3.lineTo(260,y);
+    cx3.strokeStyle='rgba(17,17,17,.07)';
+    cx3.lineWidth=1;
+    cx3.stroke();
+  }
+  // EKG path
+  cx3.beginPath();
+  for(let x=0;x<=260;x+=2) {
+    const y = ekgY(x);
+    x===0 ? cx3.moveTo(x,y) : cx3.lineTo(x,y);
+  }
+  cx3.strokeStyle='#E63B2E';
+  cx3.lineWidth=2;
+  cx3.lineJoin='round';
+  cx3.stroke();
+  // Glow
+  cx3.beginPath();
+  for(let x=0;x<=260;x+=2){cx3.lineTo(x,ekgY(x))}
+  cx3.strokeStyle='rgba(230,59,46,.2)';
+  cx3.lineWidth=6;
+  cx3.stroke();
+  ekgOffset += 1.5;
+  requestAnimationFrame(drawC3);
+}
+drawC3();
+</script>
+</body>
+</html>
